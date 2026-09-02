@@ -1,0 +1,46 @@
+name: Deploy verified v15 simulator to GitHub Pages
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deployment metadata
+        uses: actions/checkout@v6
+
+      - name: Download exact v15 release package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p extracted
+          gh release download v15 --pattern "dot-voice-github-pages-v15-dot-voice-simulator.zip" --dir .
+          unzip -q dot-voice-github-pages-v15-dot-voice-simulator.zip -d extracted
+          test -f extracted/dot-voice-simulator/index.html
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload verified static site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: extracted/dot-voice-simulator
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
