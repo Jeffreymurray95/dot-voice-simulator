@@ -1,4 +1,4 @@
-name: Deploy verified v15 simulator to GitHub Pages
+name: Deploy verified v16 simulator to GitHub Pages
 
 on:
   workflow_dispatch:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.release.tag_name == 'v16'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -24,14 +25,16 @@ jobs:
       - name: Checkout deployment metadata
         uses: actions/checkout@v6
 
-      - name: Download exact v15 release package
+      - name: Download and verify exact v16 release package
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p extracted
-          gh release download v15 --pattern "dot-voice-github-pages-v15-dot-voice-simulator.zip" --dir .
-          unzip -q dot-voice-github-pages-v15-dot-voice-simulator.zip -d extracted
-          test -f extracted/dot-voice-simulator/index.html
+          gh release download v16 --pattern "github-pages-dot-voice-simulator.zip" --dir .
+          echo "65b759587163ba80391d971d4ec6ac47277ee86e70f031784fefcfdf2a4849b1  github-pages-dot-voice-simulator.zip" | sha256sum --check --strict
+          unzip -q github-pages-dot-voice-simulator.zip -d extracted
+          test -f extracted/index.html
+          test -f extracted/.nojekyll
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -39,7 +42,7 @@ jobs:
       - name: Upload verified static site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: extracted/dot-voice-simulator
+          path: extracted
 
       - name: Deploy to GitHub Pages
         id: deployment
