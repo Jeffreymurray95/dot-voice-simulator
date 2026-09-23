@@ -1,4 +1,4 @@
-name: Deploy verified v16 simulator to GitHub Pages
+name: Deploy verified v17 simulator to GitHub Pages
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || github.event.release.tag_name == 'v16'
+    if: github.event_name == 'workflow_dispatch' || github.event.release.tag_name == 'v17'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,13 +25,13 @@ jobs:
       - name: Checkout deployment metadata
         uses: actions/checkout@v6
 
-      - name: Download and verify exact v16 release package
+      - name: Download and verify exact v17 release package
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p extracted
-          gh release download v16 --pattern "github-pages-dot-voice-simulator.zip" --dir .
-          echo "65b759587163ba80391d971d4ec6ac47277ee86e70f031784fefcfdf2a4849b1  github-pages-dot-voice-simulator.zip" | sha256sum --check --strict
+          gh release download v17 --pattern "github-pages-dot-voice-simulator.zip" --dir .
+          echo "a8cbc1ca8acffadf7ffc88f5a44161836a032d937864d640e8812aa96a957ff7  github-pages-dot-voice-simulator.zip" | sha256sum --check --strict
           unzip -q github-pages-dot-voice-simulator.zip -d extracted
           test -f extracted/index.html
           test -f extracted/.nojekyll
